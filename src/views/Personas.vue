@@ -81,7 +81,7 @@
         </div>
 
         <b-button type="button" variant="primary" v-if="newPersona['.key']" v-on:click="updatePersona(newPersona)">Update</b-button>
-        <b-button type="submit" variant="danger" v-if="!newPersona['.key']" v-on:click="addPersona">Add Persona</b-button>
+
 
         </b-form-group>
       </form>
