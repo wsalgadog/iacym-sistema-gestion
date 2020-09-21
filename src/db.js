@@ -20,4 +20,6 @@ export const db = firebase
 // const { Timestamp, GeoPoint } = firebase.firestore
 // export { Timestamp, GeoPoint }
 
+//export const personasRef = db.collection('personas')
+
 export const personasRef = db.collection('personas')

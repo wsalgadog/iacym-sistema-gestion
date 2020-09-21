@@ -3,29 +3,35 @@
   <div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Personas</h3>
+            <h3 class="panel-title">Miembros de la Iglesia</h3>
         </div>
         <br/>
         <div class="panel-body">
-            <b-button v-b-modal.modal-prevent-closing>Agregar Persona</b-button>
+            <b-button v-b-modal.modal-prevent-closing @click="addModal">Agregar Miembro</b-button>
+            <br />
             <br />
             <div class="panel panel-default">
                 <table class="table table-striped">
                     <tr>
                         <th>Nombres</th>
-                        <th>email</th>
-                        <th>Tipo Doc</th>
-                        <th>Nro Doc</th>
+                        <th>Apellidos</th>
+                        <th>E.Civil</th>
+                        <th>F.Nacim</th>
+                        <th>Email</th>
+                        <th>Telefono</th>
                         <th>Acciones</th>
                     </tr>
                     <tr v-for="persona in personas" :key="persona['.key']">
                         <td>{{persona.nombres}}</td>
+                        <td>{{persona.apellidos}}</td>
+                        <td>{{persona.estadocivil}}</td>
+                        <td>{{persona.fechanacimiento}}</td>
                         <td>{{persona.email}}</td>
-                        <td>{{persona.tipodocumento}}</td>
-                        <td>{{persona.numero_documento}}</td>
+                        <td>{{persona.telefono}}</td>
                         <td>
-                            <button v-on:click="editPersona(persona)" type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
-                            <button v-on:click="removePersona(persona)" type="button" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</button>
+                            <button v-on:click="editModal(persona)" type="button" class="btn btn-outline-primary btn-sm"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>Editar</button>
+                            
+                            <button v-on:click="deletePersona(persona)" type="button" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Eliminar</button>
                         </td>
                     </tr>
                 </table>
@@ -33,64 +39,161 @@
         </div>
     </div>
 
-
-    
-
     <b-modal
       id="modal-prevent-closing"
       ref="modal"
-      title="Datos de la persona"
+      v-bind:title="titulo"
       size="lg"
-      @show="resetModal"
-      @hidden="resetModal"
+      cancel-title="Cancelar"
+      ok-title="Guardar"
+      @hidden="resetModal"      
       @ok="handleOk"
     >
       <form ref="form" @submit.stop.prevent="handleSubmit">
-        <b-form-group
-          :state="nameState"
-          label="Name"
-          label-for="name-input"
-          invalid-feedback="Name is required"    
-        >
+        <b-card no-body>
+            <b-tabs card>
+            <b-tab title="Datos personales" active>
+                <b-form-group
+                :state="nombreState"
+                label="Nombres"
+                label-for="input-nombre"
+                >
+                    <b-form-input id="input-nombre" 
+                        v-model="persona.nombres" 
+                        class="form-control"  
+                        :state="nombreState"
+                        placeholder="Digite el nombre de la persona"   
+                        :formatter="formatoMayusculas"         
+                        trim    
+                        required  
+                        autofocus       
+                    ></b-form-input>          
+                </b-form-group>
 
-        <div class="form-group">
-            <label for="exampleInputPassword1">Nombres</label>
-            <input v-model="newPersona.nombres" type="text" class="form-control" id="exampleInputPassword1" placeholder="Business Name">
-        </div>
-        <div class="form-group">
-            <label for="basic-url">email</label>
-            <div class="input-group">
-            <input v-model="newPersona.email" type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-            </div>
-        </div>
+                <b-form-group
+                :state="apellidoState"
+                label="Apellidos"
+                label-for="input-apellido"
+                >
+                    <b-form-input id="input-apellido" 
+                        v-model="persona.apellidos" 
+                        class="form-control"  
+                        :state="apellidoState"
+                        placeholder="Digite el apellido de la persona"                         
+                        :formatter="formatoMayusculas"                             
+                        trim    
+                        required         
+                    ></b-form-input>          
+                </b-form-group>
 
-        <b-form-group id="input-group-3" label="Tipo Documento:" label-for="input-3">
-            <b-form-select
-            id="input-3"
-            v-model="newPersona.tipodocumento"
-            :options="tipodocs"
-            required
-            ></b-form-select>
-        </b-form-group>
+                <b-form-group
+                label="Fecha de Nacimiento"
+                label-for="input-fecha"
+                >
+                    <b-form-input id="input-fecha" 
+                        v-model="persona.fechanacimiento" 
+                        class="form-control"  
+                        placeholder="Seleccione la fecha de nacimiento"                
+                        type="date"        
+                    ></b-form-input>          
+                </b-form-group>
 
-        <div class="form-group">
-            <label for="basic-url">Número Documento</label>
-            <div class="input-group">
-            <input v-model="newPersona.numero_documento" type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-            </div>
-        </div>
+                <b-form-group 
+                    label="Estado Civil:" 
+                    label-for="select-ecivil"
+                >
+                    <b-form-select id="select-ecivil"
+                        v-model="persona.estadocivil"
+                        :options="estadocivil"
+                    ></b-form-select>
+                </b-form-group>                
+            </b-tab>
+            <b-tab title="Contacto">
 
-        <b-button type="button" variant="primary" v-if="newPersona['.key']" v-on:click="updatePersona(newPersona)">Update</b-button>
+                <b-form-group
+                label="Email"
+                label-for="input-email"
+                invalid-feedback="Ingrese minimo 10 digitos"
+                >
+                    <b-form-input id="input-email" 
+                        v-model="persona.email" 
+                        class="form-control"  
+                        placeholder="Digite el email de la persona"   
+                        :formatter="formatoMinusculas" 
+                        type="email"            
+                        trim         
+                    ></b-form-input>          
+                </b-form-group>
 
+                <b-form-group
+                label="Telefono"
+                label-for="input-telefono"
+                >
+                    <b-form-input id="input-telefono" 
+                        v-model="persona.telefono" 
+                        class="form-control"  
+                        placeholder="Digite el telefono de la persona"   
+                        type="tel"              
+                    ></b-form-input>          
+                </b-form-group>
 
-        </b-form-group>
+            </b-tab>
+            <b-tab title="Dirección">
+                <b-form-group 
+                    label="Distrito:" 
+                    label-for="select-distrito"
+                >
+                    <b-form-input id="input-distrito"
+                        v-model="persona.distrito"
+                        list="list-distrito"
+                    ></b-form-input>
+                    <datalist id="list-distrito">
+                        <option v-for="distrito in distritos" v-bind:key="distrito">{{ distrito }}</option>
+                    </datalist>                          
+                </b-form-group>
+
+                <b-form-group
+                label="Dirección:"
+                label-for="textarea-direccion"
+                >
+                    <b-form-textarea
+                        id="textarea-direccion"
+                        placeholder="Digite la dirección"   
+                        rows="3"                    
+                        v-model="persona.direccion"          
+                        trim         
+                    ></b-form-textarea>                        
+                </b-form-group>
+            </b-tab>      
+            <b-tab title="Identificación">
+                <b-form-group 
+                    label="Tipo de Documento:" 
+                    label-for="select-tipodoc"
+                >
+                    <b-form-select id="select-tipodoc"
+                        v-model="persona.tipodocumento"
+                        :options="tipodocs"
+                    ></b-form-select>
+                </b-form-group>
+
+                <b-form-group
+                label="Número de Documento:"
+                label-for="input-nrodoc"
+                >
+                    <b-form-input id="input-nrodoc" 
+                        v-model="persona.numero_documento" 
+                        class="form-control"  
+                        placeholder="Digite el número de documento de identidad"   
+                        type="number"             
+                        trim         
+                    ></b-form-input>          
+                </b-form-group>
+            </b-tab>                  
+            </b-tabs>
+        </b-card>
+
       </form>
     </b-modal>
-
-
-
-
-
 
     <ul class="errors">
     </ul>
@@ -101,27 +204,145 @@
 <script>
 
     import { personasRef } from './../db'
-
+    import { db } from './../db'
+    
     export default {
         data() {
             return {
+                modal: null,       
+                titulo: '',     
+                idpersona: null,
                 personas: [],
-                nameState: null,
-                newPersona: {
+                persona: {
                     nombres: '',
+                    apellidos: '',
                     email: '',
+                    estadocivil: null,
+                    fechanacimiento: '',
+                    telefono: '',
                     tipodocumento: null,
-                    numero_documento: ''
-                },
-                tipodocs: [{ text: 'Seleccione', value: null }, 'DNI', 'CE'],                
+                    numero_documento: '',
+                    distrito:'',
+                    direccion:''
+                },     
+                tipodocs: [{ text: 'Seleccione', value: null }, 'DNI', 'CE'],       
+                distritos: ['LOS OLIVOS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL'],
+                estadocivil: [{ text: 'Seleccione', value: null }, 'CASADO', 'SOLTERO', 'VIUDO', 'DIVORCIADO', 'CONVIVIENTE', 'SEPARADO'],          
             }
         },
+        created(){
+            this.$bind('personas', personasRef).then(personas => {
+                this.personas === personas
+            })
+            //this.$bindAsArray('personas', personasRef);
+        },        
+        computed:{
+            nombreState() {
+                return this.persona.nombres.length > 2 ? true : false
+            },
+            apellidoState() {
+                return this.persona.apellidos.length > 2 ? true : false
+            }            
+        },
         methods: {
-            addPersona() {
-                personasRef.add(this.newPersona)
-            },          
+            addModal(){
+                this.modal = 'new';
+                this.titulo = "Nueva persona"
+                this.resetModal();
+                this.$bvModal.show('modal-prevent-closing')
+            },
+            editModal(persona) {
+                this.idpersona = persona.id
+                this.modal = 'edit';
+                this.titulo = persona.nombres + ' ' + persona.apellidos
+                //console.log( this.idpersona)                
+                db.collection('personas')
+                    .doc(persona.id)
+                    .get()
+                    .then(snapshot => {
+                        this.persona = snapshot.data()
+                    })
+
+                //console.log(this.persona)
+
+
+                //personasRef.child(persona['.key']).update({ edit:true }); 
+                this.$bvModal.show('modal-prevent-closing')
+            },            
+            resetModal(){
+                this.persona = {
+                    nombres: '',
+                    apellidos: '',
+                    email: '',
+                    estadocivil: null,
+                    fechanacimiento: '',
+                    telefono: '',
+                    tipodocumento: null,
+                    numero_documento: '',
+                    distrito:'',
+                    direccion:''
+                }
+                this.idpersona = null
+            },            
+            updatePersona(){
+                db.collection('personas')
+                    .doc(this.idpersona)
+                    .set(this.persona)
+                    .then(() => {
+                        //console.log('user updated!')
+                    })
+
+                this.$bvModal.hide('modal-prevent-closing')
+            },
+            addPersona(){       
+                console.log('nuevoooo')     
+                personasRef.add(this.persona)
+                this.$bvModal.hide('modal-prevent-closing')
+            },
+            deletePersona(persona){
+                personasRef.doc(persona.id).delete()             
+            },         
+            checkFormValidity() {
+                const valid = this.$refs.form.checkValidity()
+                return valid
+            },            
+            handleOk(bvModalEvt) {
+                // Prevent modal from closing
+                bvModalEvt.preventDefault()
+                // Trigger submit handler
+                this.handleSubmit()
+            },
+            handleSubmit() {
+                // Exit when the form isn't valid
+                if (!this.checkFormValidity()) {
+                    return
+                }
+                // Push the name to submitted names
+                //this.submittedNames.push(this.name)
+                // Hide the modal manually
+                if(this.modal=="edit")
+                { 
+                    this.updatePersona()
+                } else {
+                    this.addPersona()
+                }
+                
+                this.$nextTick(() => {
+                    this.$bvModal.hide('modal-prevent-closing')
+                })
+            },
+            formatoMayusculas(value) {
+                return value.toUpperCase();
+            },
+            formatoMinusculas(value) {
+                return value.toLowerCase();
+            }                               
+            /*
+             
             editPersona: function(persona) {
-                this.newPersona = persona
+                modal = "edit"
+                //this.resetModal()
+                this.persona = persona
                 this.$bvModal.show('modal-prevent-closing')
             },       
             updatePersona: function(persona) {
@@ -130,6 +351,7 @@
                 this.$firebaseRefs.personas.child(childKey).set(persona)
             },                  
             removePersona(persona){
+                console.log(persona)
                 personasRef.doc(persona.id).delete()
                 //postsRef.child(post['.key']).remove()
                 //toastr.success('Persona removed successfully')                
@@ -139,12 +361,6 @@
                 this.nameState = valid
                 return valid
             },            
-            resetModal() {
-                this.newPersona.nombres = ''
-                this.newPersona.email = ''
-                this.newPersona.tipodocumento = null
-                this.newPersona.numero_documento = ''
-            },  
             handleOk(bvModalEvt) {
                     // Prevent modal from closing
                     bvModalEvt.preventDefault()
@@ -163,14 +379,8 @@
                 this.$nextTick(() => {
                     this.$bvModal.hide('modal-prevent-closing')
                 })
-            }            
-        },
-        created(){
-            this.$bind('personas', personasRef).then(personas => {
-                // user will point to the same property declared in data:
-                this.personas === personas
-            })
-            //this.$bindAsArray('personas', personasRef);
+            }      
+            */      
         }
     }
 
