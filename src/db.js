@@ -23,3 +23,4 @@ export const db = firebase
 //export const personasRef = db.collection('personas')
 
 export const personasRef = db.collection('personas')
+export const gruposRef = db.collection('grupos')

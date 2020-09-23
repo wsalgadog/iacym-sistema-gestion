@@ -10,32 +10,29 @@
             <b-button v-b-modal.modal-prevent-closing @click="addModal">Agregar Miembro</b-button>
             <br />
             <br />
-            <div class="panel panel-default">
-                <table class="table table-striped">
-                    <tr>
-                        <th>Nombres</th>
-                        <th>Apellidos</th>
-                        <th>E.Civil</th>
-                        <th>F.Nacim</th>
-                        <th>Email</th>
-                        <th>Telefono</th>
-                        <th>Acciones</th>
-                    </tr>
-                    <tr v-for="persona in personas" :key="persona['.key']">
-                        <td>{{persona.nombres}}</td>
-                        <td>{{persona.apellidos}}</td>
-                        <td>{{persona.estadocivil}}</td>
-                        <td>{{persona.fechanacimiento}}</td>
-                        <td>{{persona.email}}</td>
-                        <td>{{persona.telefono}}</td>
-                        <td>
-                            <button v-on:click="editModal(persona)" type="button" class="btn btn-outline-primary btn-sm"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>Editar</button>
-                            
-                            <button v-on:click="deletePersona(persona)" type="button" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Eliminar</button>
-                        </td>
-                    </tr>
-                </table>
-            </div>            
+
+            <b-table 
+                :items="personas"
+                :fields="fields"
+                :small="true"
+                :striped="true"
+                :bordered="true"   
+                :primary-key="persona.id"   
+                :responsive="true"       
+                >
+                <template v-slot:cell(actions)="persona">
+                    <b-button size="sm" @click="editModal(persona.item)" class="mr-1">
+                    Modificar
+                    <b-icon icon="edit" size="is-small"></b-icon>
+                    </b-button>
+                    <b-button size="sm" @click="deletePersona(persona.item)" class="btn btn-danger btn-sm">
+                    Eliminar
+                    <b-icon icon="delete" size="is-small"></b-icon>
+                    </b-button>
+                </template>
+            </b-table>
+
+       
         </div>
     </div>
 
@@ -225,6 +222,41 @@
                     distrito:'',
                     direccion:''
                 },     
+                fields: [                     
+                    {
+                        key: 'nombres',
+                        sortable: true
+                    },
+                    {
+                        key: 'apellidos',
+                        sortable: false                      
+                    },
+                    {
+                        key: 'estadocivil',
+                        label: 'E.Civil',
+                        sortable: true
+                    },
+                    {
+                        key: 'fechanacimiento',
+                        label: 'F.Nac.',
+                        sortable: false
+                    },
+                    {
+                        key: 'email',
+                        label: 'email',
+                        sortable: false
+                    },    
+                    {
+                        key: 'telefono',
+                        label: 'Teléfono',
+                        sortable: false
+                    },   
+                    {
+                        key: 'actions',
+                        label: ''
+                    },                      
+                                                                                                                                         
+                ],                
                 tipodocs: [{ text: 'Seleccione', value: null }, 'DNI', 'CE'],       
                 distritos: ['LOS OLIVOS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL'],
                 estadocivil: [{ text: 'Seleccione', value: null }, 'CASADO', 'SOLTERO', 'VIUDO', 'DIVORCIADO', 'CONVIVIENTE', 'SEPARADO'],          
@@ -244,7 +276,7 @@
                 return this.persona.apellidos.length > 2 ? true : false
             }            
         },
-        methods: {
+        methods: {  
             addModal(){
                 this.modal = 'new';
                 this.titulo = "Nueva persona"

@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
-import Personas from '../views/Personas.vue'
 
 Vue.use(VueRouter)
 
@@ -13,9 +12,14 @@ const routes = [
   },
   {
     path: '/personas',
-    name: 'Personas',
-    component: Personas
+    name: 'personas',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Personas.vue')
   },  
+  {
+    path: '/grupos',
+    name: 'grupos',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Grupos.vue')
+  },    
   {
     path: '/about',
     name: 'About',
