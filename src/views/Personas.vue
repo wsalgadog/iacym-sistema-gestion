@@ -24,9 +24,12 @@
                     <b-button size="sm" @click="editModal(persona.item)" class="mr-1">
                         <b-icon icon="pencil" size="is-small"></b-icon>
                     </b-button>
+                    <b-button size="sm" @click="editFamilia(persona.item)" class="mr-1" variant="outline-primary" >
+                        <b-icon icon="person" size="is-small"></b-icon>
+                    </b-button>       
                     <b-button size="sm" @click="deletePersona(persona.item)" class="btn btn-danger btn-sm">
                         <b-icon icon="trash" size="is-small"></b-icon>
-                    </b-button>
+                    </b-button>                                 
                 </template>
             </b-table>
 
@@ -183,18 +186,7 @@
                         trim         
                     ></b-form-input>          
                 </b-form-group>
-            </b-tab>   
-            <b-tab title="Familiares">
-                <b-table 
-                    :items="personas.familiares"
-                    :fields="fieldsfamilia"
-                    :small="true"
-                    :striped="true"
-                    :bordered="true"   
-                    :responsive="true"       
-                    >
-                </b-table>                
-            </b-tab>               
+            </b-tab>              
             </b-tabs>
         </b-card>
 
@@ -210,7 +202,6 @@
 <script>
 
     import { personasRef } from './../db'
-    import { db } from './../db'
     
     export default {
         data() {
@@ -311,20 +302,29 @@
                 this.idpersona = persona.id
                 this.modal = 'edit';
                 this.titulo = persona.nombres + ' ' + persona.apellidos
-                console.log( this.persona)                
-                db.collection('personas')
-                    .doc(persona.id)
-                    .get()
-                    .then(snapshot => {
-                        this.persona = snapshot.data()
-                    })
 
-                //console.log(this.persona)
-
-
-                //personasRef.child(persona['.key']).update({ edit:true }); 
+                personasRef.doc(persona.id).get()
+                .then(snapshot => {
+                    this.persona = snapshot.data()
+                });       
                 this.$bvModal.show('modal-prevent-closing')
-            },            
+            },       
+            async editFamilia(persona) {
+                //this.idpersona = persona.id
+                //this.modal = 'edit';
+                //this.titulo = persona.nombres + ' ' + persona.apellidos
+                console.log(persona.id)
+    
+                let familiaCollection = await personasRef.doc(persona.id).collection("familiares").get()
+                .then(snapshot => {
+                    console.log(snapshot)
+                    snapshot.forEach(doc => {
+                        console.log("Sub Document ID: ", doc.id);
+                    })
+                });       
+                console.log(familiaCollection)
+                //this.$bvModal.show('modal-prevent-closing')
+            },                   
             resetModal(){
                 this.persona = {
                     nombres: '',
@@ -342,9 +342,7 @@
                 this.idpersona = null
             },            
             updatePersona(){
-                db.collection('personas')
-                    .doc(this.idpersona)
-                    .set(this.persona)
+                personasRef.doc(this.idpersona).set(this.persona)
                     .then(() => {
                         //console.log('user updated!')
                     })
@@ -352,7 +350,6 @@
                 this.$bvModal.hide('modal-prevent-closing')
             },
             addPersona(){       
-                console.log('nuevoooo')     
                 personasRef.add(this.persona)
                 this.$bvModal.hide('modal-prevent-closing')
             },
@@ -394,50 +391,6 @@
             formatoMinusculas(value) {
                 return value.toLowerCase();
             }                               
-            /*
-             
-            editPersona: function(persona) {
-                modal = "edit"
-                //this.resetModal()
-                this.persona = persona
-                this.$bvModal.show('modal-prevent-closing')
-            },       
-            updatePersona: function(persona) {
-                const childKey = persona['.key'];
-                delete persona['.key'];
-                this.$firebaseRefs.personas.child(childKey).set(persona)
-            },                  
-            removePersona(persona){
-                console.log(persona)
-                personasRef.doc(persona.id).delete()
-                //postsRef.child(post['.key']).remove()
-                //toastr.success('Persona removed successfully')                
-            },
-            checkFormValidity() {
-                const valid = this.$refs.form.checkValidity()
-                this.nameState = valid
-                return valid
-            },            
-            handleOk(bvModalEvt) {
-                    // Prevent modal from closing
-                    bvModalEvt.preventDefault()
-                    // Trigger submit handler
-                    this.handleSubmit()
-            },
-            handleSubmit() {
-                // Exit when the form isn't valid
-                if (!this.checkFormValidity()) {
-                    return
-                }
-                // Push the name to submitted names
-                //this.submittedNames.push(this.name)
-                // Hide the modal manually
-                this.addPersona()
-                this.$nextTick(() => {
-                    this.$bvModal.hide('modal-prevent-closing')
-                })
-            }      
-            */      
         }
     }
 
