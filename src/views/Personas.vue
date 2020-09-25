@@ -22,12 +22,10 @@
                 >
                 <template v-slot:cell(actions)="persona">
                     <b-button size="sm" @click="editModal(persona.item)" class="mr-1">
-                    Modificar
-                    <b-icon icon="edit" size="is-small"></b-icon>
+                        <b-icon icon="pencil" size="is-small"></b-icon>
                     </b-button>
                     <b-button size="sm" @click="deletePersona(persona.item)" class="btn btn-danger btn-sm">
-                    Eliminar
-                    <b-icon icon="delete" size="is-small"></b-icon>
+                        <b-icon icon="trash" size="is-small"></b-icon>
                     </b-button>
                 </template>
             </b-table>
@@ -185,7 +183,18 @@
                         trim         
                     ></b-form-input>          
                 </b-form-group>
-            </b-tab>                  
+            </b-tab>   
+            <b-tab title="Familiares">
+                <b-table 
+                    :items="personas.familiares"
+                    :fields="fieldsfamilia"
+                    :small="true"
+                    :striped="true"
+                    :bordered="true"   
+                    :responsive="true"       
+                    >
+                </b-table>                
+            </b-tab>               
             </b-tabs>
         </b-card>
 
@@ -220,7 +229,8 @@
                     tipodocumento: null,
                     numero_documento: '',
                     distrito:'',
-                    direccion:''
+                    direccion:'',
+                    familiares: []
                 },     
                 fields: [                     
                     {
@@ -256,7 +266,21 @@
                         label: ''
                     },                      
                                                                                                                                          
-                ],                
+                ],       
+                fieldsfamilia: [                     
+                    {
+                        key: 'nombres',
+                        label: 'Nombres'
+                    },
+                    {
+                        key: 'apellidos',
+                        label: 'Apellidos'           
+                    },
+                    {
+                        key: 'parentesco',
+                        label: 'Parentesco'
+                    }                                                                                                                                                
+                ],                               
                 tipodocs: [{ text: 'Seleccione', value: null }, 'DNI', 'CE'],       
                 distritos: ['LOS OLIVOS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL'],
                 estadocivil: [{ text: 'Seleccione', value: null }, 'CASADO', 'SOLTERO', 'VIUDO', 'DIVORCIADO', 'CONVIVIENTE', 'SEPARADO'],          
@@ -287,7 +311,7 @@
                 this.idpersona = persona.id
                 this.modal = 'edit';
                 this.titulo = persona.nombres + ' ' + persona.apellidos
-                //console.log( this.idpersona)                
+                console.log( this.persona)                
                 db.collection('personas')
                     .doc(persona.id)
                     .get()
@@ -312,7 +336,8 @@
                     tipodocumento: null,
                     numero_documento: '',
                     distrito:'',
-                    direccion:''
+                    direccion:'',
+                    familia: []
                 }
                 this.idpersona = null
             },            

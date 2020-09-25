@@ -6,6 +6,7 @@
             <h3 class="panel-title">Cursos</h3>
         </div>
         <br/>
+
         <div class="panel-body">
             <b-button v-b-modal.modal-prevent-closing @click="addModal">Agregar Curso</b-button>
             <br />
@@ -17,24 +18,23 @@
                 :small="true"
                 :striped="true"
                 :bordered="true"   
-                :primary-key="grupo.id"   
-                :responsive="true"       
-                >
-                <template v-slot:cell(fechaini)="grupo">
-                    <span>{{ grupo.item.fecha_inicio.toDate() | moment("YYYY/MM/DD") }}</span>
-                </template>                   
-                <template v-slot:cell(fechafin)="grupo">
-                    <span>{{ grupo.item.fecha_fin.toDate() | moment("YYYY/MM/DD") }}</span>
-                </template>            
+                :primary-key="grupo.id"                   
+                :responsive="true"  
+                :sticky-header=true
+                head-variant="light"     
+                table-variant="light"
+                >                
                 <template v-slot:cell(actions)="grupo">
-                    <b-button size="sm" @click="editModal(grupo.item)" class="mr-1">
-                    Modificar
-                    <b-icon icon="edit" size="is-small"></b-icon>
+                    <b-button size="sm" @click="editModal(grupo.item)" class="mr-1" variant="outline-primary">
+                        <b-icon icon="person-lines-fill" size="is-small"></b-icon>
+                    </b-button>                 
+                    <b-button size="sm" @click="editModal(grupo.item)" class="mr-1" variant="outline-secondary">
+                        <b-icon icon="pencil" size="is-small"></b-icon>
                     </b-button>
                     <b-button size="sm" @click="deleteGrupo(grupo.item)" class="btn btn-danger btn-sm">
-                    Eliminar
-                    <b-icon icon="delete" size="is-small"></b-icon>
+                        <b-icon icon="trash" size="is-small"></b-icon>
                     </b-button>
+                  
                 </template>
             </b-table>
 
@@ -42,6 +42,111 @@
         </div>
     </div>
 
+
+    <b-modal
+      id="modal-prevent-closing"
+      ref="modal"
+      v-bind:title="titulo"
+      size="lg"
+      cancel-title="Cancelar"
+      ok-title="Guardar"
+      @hidden="resetModal"      
+      @ok="handleOk"    
+    >
+        <form ref="form" @submit.stop.prevent="handleSubmit">
+            <div>
+                <b-form-group
+                :state="nombreState"
+                label="Nombre del curso"
+                label-for="input-nombre"
+                >                
+                   <b-form-input id="input-nombre" 
+                        v-model="grupo.nombre" 
+                        class="form-control"  
+                        :state="nombreState"
+                        placeholder="Digite el nombre del curso"   
+                        :formatter="formatoMayusculas"         
+                        trim    
+                        required  
+                        autofocus       
+                    ></b-form-input>          
+                </b-form-group>
+
+                <b-form-group
+                :state="encargadoState"
+                label="Encargado"
+                label-for="input-encargado"
+                >
+                    <b-form-input id="input-encargado" 
+                        v-model="grupo.encargado" 
+                        class="form-control"  
+                        :state="encargadoState"
+                        placeholder="Digite el encargado del curso"                         
+                        :formatter="formatoMayusculas"                             
+                        trim    
+                        required         
+                    ></b-form-input>          
+                </b-form-group>
+
+                <b-form-group
+                label="Asistente"
+                label-for="input-asistente"
+                >
+                    <b-form-input id="input-asistente" 
+                        v-model="grupo.asistente" 
+                        class="form-control"  
+                        placeholder="Digite el asistente del curso"                         
+                        :formatter="formatoMayusculas"                             
+                        trim    
+                    ></b-form-input>          
+                </b-form-group>
+
+                <b-row>
+                <b-col cols="4">
+                    <b-form-group
+                    label="Fecha de Inicio"
+                    label-for="input-finicio"
+                    >
+                        <b-form-input id="input-finicio" 
+                            v-model="grupo.fecha_inicio" 
+                            class="form-control"  
+                            placeholder="Seleccione la fecha de inicio"                
+                            type="date"        
+                        ></b-form-input>          
+                    </b-form-group>
+                </b-col>
+                
+                <b-col cols="4">
+                    <b-form-group
+                    label="Fecha de Fin"
+                    label-for="input-ffin"
+                    >
+                        <b-form-input id="input-ffin" 
+                            v-model="grupo.fecha_fin" 
+                            class="form-control"  
+                            placeholder="Seleccione la fecha de Fin"                
+                            type="date"        
+                        ></b-form-input>          
+                    </b-form-group>	
+                </b-col>
+
+                <b-col cols="4">
+                    <b-form-group 
+                        label="Estado:" 
+                        label-for="select-estado"
+                    >
+                        <b-form-select id="select-estado"
+                            v-model="grupo.estado"
+                            :options="estados"
+                        ></b-form-select>
+                    </b-form-group>                        
+                </b-col>
+                </b-row>
+               
+            </div>            
+        </form>
+
+    </b-modal>
 
     <ul class="errors">
     </ul>
@@ -53,6 +158,8 @@
 
     import { gruposRef } from './../db'
     import { db } from './../db'
+    //const moment= require('moment') 
+    //require('moment/locale/es')
 
     export default {
         data() {
@@ -85,14 +192,14 @@
                     },
                     {
                         key: 'estado',
-                        sortable: false
+                        sortable: true
                     },
                     {
-                        key: 'fechaini',
+                        key: 'fecha_inicio',
                         label: 'Fecha Inicio'
                     },  
                     {
-                        key: 'fechafin',
+                        key: 'fecha_fin',
                         label: 'Fecha Fin'
                     },                       
                     {
@@ -103,7 +210,7 @@
                 ],                
                 tipodocs: [{ text: 'Seleccione', value: null }, 'DNI', 'CE'],       
                 distritos: ['LOS OLIVOS', 'SAN MARTIN DE PORRES', 'SAN MIGUEL'],
-                estadocivil: [{ text: 'Seleccione', value: null }, 'CASADO', 'SOLTERO', 'VIUDO', 'DIVORCIADO', 'CONVIVIENTE', 'SEPARADO'],          
+                estados: ['VIGENTE', 'CULMINADO'],          
             }
         },
         created(){
@@ -115,15 +222,32 @@
         computed:{
             nombreState() {
                 return this.grupo.nombre.length > 2 ? true : false
-            }       
+            } ,
+            encargadoState() {
+                return this.grupo.encargado.length > 2 ? true : false
+            }                       
         },
         methods: {  
+            /*
+            getFecha(fecha){
+                console.log(fecha)
+                
+                if (fecha == null){
+                    return 'xxx'
+                }else {
+                    console.log(fecha)
+                    console.log(new Date(fecha) | moment("DD/MM/YYYY"))
+                    return "sarava" //
+                }
+                
+                
+            }, */        
             getitemcontrols() {
                 return 'item.controls';
             },            
             addModal(){
                 this.modal = 'new';
-                this.titulo = "Nuevo Grupo"
+                this.titulo = "Nuevo Curso"
                 this.resetModal();
                 this.$bvModal.show('modal-prevent-closing')
             },
