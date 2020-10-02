@@ -310,6 +310,40 @@
                 this.$bvModal.show('modal-prevent-closing')
             },       
             async editFamilia(persona) {
+
+
+                //let familiar1 = { nombres: "Wilmer", apellidos:"Salgado", edad:44 }
+                //let familiar2 = { nombres: "Josue", apellidos:"Contreras", edad:11 }
+                //let familiar3 = { id:"fam1", datos: { nombres: "Josue", apellidos:"Contreras", edad:11 } }
+                let familiar1 = { nombres: "Josue", apellidos:"Salgado", edad:11 }
+                let familiar2 = { nombres: "Miena", apellidos:"Lolita", edad:18 }
+
+                personasRef.doc(persona.id).update({
+                    //"telefono": 1122334455,
+                    //"localizacion.direccion": "San Guido",
+                    //"familiares": [ familiar1, familiar2, familiar3 ],
+                    "countFamilia":0,
+                    "familia.familia1": familiar1,
+                    "familia.familia2": familiar2
+                })
+                .then(function() {
+                    console.log("Document successfully updated!");
+                });
+
+/*
+                personasRef.doc(persona.id)
+                    .collection('familia')
+                    .update(familiar)
+*/
+
+                //let per = personasRef.doc(persona.id)
+                //    .collection('familiares').doc("familiar1")
+
+                //console.log(per)
+
+
+                return
+/*
                 //this.idpersona = persona.id
                 //this.modal = 'edit';
                 //this.titulo = persona.nombres + ' ' + persona.apellidos
@@ -324,6 +358,7 @@
                 });       
                 console.log(familiaCollection)
                 //this.$bvModal.show('modal-prevent-closing')
+*/                
             },                   
             resetModal(){
                 this.persona = {
